@@ -33,14 +33,14 @@ connectDB();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app/"],
+    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app/"],
+    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -128,14 +128,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app/"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
-app.use(
   session({
     secret: process.env.SESSION_SECRET || "your_session_secret",
     resave: false,
@@ -147,9 +139,6 @@ app.use(
     },
   })
 );
-
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 const cookieOptions = {
   httpOnly: true,
