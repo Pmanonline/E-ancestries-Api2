@@ -19,6 +19,7 @@
     "body-parser": "^1.20.3",
     "concurrently": "^9.0.1",
     "config": "^3.3.12",
+    "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",

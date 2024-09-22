@@ -24,6 +24,7 @@ const PersonModel = require("./src/models/personModel");
 const { authMiddleware, refreshMiddleware } = require("./src/middleware/auth");
 const http = require("http");
 const { Server } = require("socket.io");
+const MongoStore = require("connect-mongo");
 
 dotenv.config();
 connectDB();
@@ -113,6 +114,9 @@ app.use(
     secret: process.env.SESSION_SECRET || "your_session_secret",
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // Make sure to set your MongoDB URI
+    }),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
