@@ -1,2 +1,11 @@
-node_modules
+# Node.js
+node_modules/
+npm-debug.log
+
+# Environment Variables
+.env
+
+# Other files to ignore
+dist/
+build/
 .env
