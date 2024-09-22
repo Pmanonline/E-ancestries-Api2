@@ -164,5 +164,21 @@ app.get("/", (req, res) => {
   res.send("Welcome to the API");
 });
 
+app.get("/env-check", (req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || "Not set",
+    PORT: process.env.PORT || "Not set",
+    MONGO_URI: process.env.MONGO_URI || "Not set",
+    SESSION_SECRET: process.env.SESSION_SECRET || "Not set",
+    EMAIL_USER: process.env.EMAIL_USER || "Not set",
+    EMAIL_PASS: process.env.EMAIL_PASS || "Not set",
+    JWT_SECRET: process.env.JWT_SECRET || "Not set",
+    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "Not set",
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET || "Not set",
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "Not set",
+    FRONTEND_URL: process.env.FRONTEND_URL || "Not set",
+  });
+});
+
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
