@@ -125,7 +125,7 @@ app.use(
   })
 );
 
-// Middleware
+// Middleware////
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
