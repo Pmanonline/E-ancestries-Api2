@@ -160,6 +160,9 @@ app.use("/api", NameRoute);
 app.use("/api", historicalRoutes);
 app.use("/api", ConnectionRoute);
 app.use("/api", authMiddleware, FTroutes);
+app.get("/", (req, res) => {
+  res.send("Welcome to the API");
+});
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
