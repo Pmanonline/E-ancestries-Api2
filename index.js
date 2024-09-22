@@ -30,6 +30,28 @@ dotenv.config();
 connectDB();
 // passportConfig(passport);
 
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.use((req, res, next) => {
+  console.log("Request headers:", req.headers);
+  next();
+});
+app.options("*", cors()); // Preflight response for all routes
+
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    console.log("Response headers.:", res.getHeaders());
+  });
+  next();
+});
+
 // Set up the HTTP server and Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -39,14 +61,6 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
 
 let onlineUsers = [];
 
