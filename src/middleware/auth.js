@@ -73,7 +73,7 @@ const authMiddleware = async (req, res, next) => {
     // Add user data to the request object
     req.user = user;
 
-    console.log("Logged in user:", user);
+    // console.log("Logged in user:", user);
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);

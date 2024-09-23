@@ -500,7 +500,7 @@ const maternalGrandFather = asyncHandler(async (req, res) => {
 const Getperson = asyncHandler(async (req, res) => {
   // const userId = req.user._id;
   const { userId } = req.params;
-  console.log("Received userId:", req.params);
+  // console.log("Received userId:", req.params);
 
   // Validate userId
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -606,7 +606,6 @@ const updatePerson = asyncHandler(async (req, res) => {
 // Function to delete a person
 const deletePerson = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  console.log(id);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     // Validate ObjectId

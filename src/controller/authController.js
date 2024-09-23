@@ -440,7 +440,7 @@ const getProfile = asyncHandler(async (req, res) => {
   }
 
   // Debug: Log image paths before mapping
-  console.log("Original image paths:", profile.images);
+  // console.log("Original image paths:", profile.images);
 
   // Map over images to include the full URL for the path
   // if (profile.images && profile.images.length > 0) {
@@ -456,7 +456,7 @@ const getProfile = asyncHandler(async (req, res) => {
   }
 
   // Debug: Log final profile data to verify the image paths
-  console.log("Updated profile:", profile);
+  // console.log("Updated profile:", profile);
 
   res.status(200).json(profile);
 });

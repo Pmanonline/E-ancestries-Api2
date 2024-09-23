@@ -39,18 +39,7 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  console.log("Request headers:", req.headers);
-  next();
-});
 app.options("*", cors()); // Preflight response for all routes
-
-app.use((req, res, next) => {
-  res.on("finish", () => {
-    console.log("Response headers.:", res.getHeaders());
-  });
-  next();
-});
 
 // Set up the HTTP server and Socket.IO
 const server = http.createServer(app);
