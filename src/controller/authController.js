@@ -297,6 +297,139 @@ const getAllProfiles = async () => {
   return await UserModel.find();
 };
 
+// const createOrUpdateProfile = asyncHandler(async (req, res) => {
+//   const {
+//     background,
+//     DOB,
+//     firstName,
+//     lastName,
+//     phoneNumber,
+//     streetAddress,
+//     lga,
+//     state,
+//     kindred,
+//     village,
+//     autonomous,
+//     tribe,
+//     religion,
+//     profession,
+//     facebook,
+//     twitter,
+//     instagram,
+//     about,
+//     middlename,
+//     captions = [], // Default to an empty array if captions are missing
+//   } = req.body;
+
+//   const userId = req.user._id;
+
+//   // Get the new single image and images array
+//   const newImage = req.files["image"] ? req.files["image"][0].path : null;
+//   const newImages = req.files["images"]
+//     ? req.files["images"].map((file, index) => ({
+//         path: file.path,
+//         caption: captions[index] || "", // Ensure captions align with images
+//       }))
+//     : [];
+
+//   // Find the existing profile
+//   let profile = await UserModel.findOne({ _id: userId });
+
+//   if (profile) {
+//     // Handle single image update (only if new image is provided)
+//     if (newImage) {
+//       // Delete the old image only if there's a new image
+//       if (profile.image && newImage !== profile.image) {
+//         const oldImagePath = path.resolve(profile.image);
+//         if (fs.existsSync(oldImagePath)) {
+//           fs.unlink(oldImagePath, (err) => {
+//             if (err) console.error("Failed to delete old image:", err);
+//           });
+//         }
+//       }
+//       profile.image = newImage; // Update image path
+//     }
+
+//     // Handle multiple image updates (only if new images are provided)
+//     if (newImages.length > 0) {
+//       // Delete only the old images that are not in the newImages array
+//       const oldImagePaths = profile.images.map((img) => img.path);
+//       oldImagePaths.forEach((oldPath) => {
+//         if (!newImages.find((newImg) => newImg.path === oldPath)) {
+//           const oldImagePath = path.resolve(oldPath);
+//           if (fs.existsSync(oldImagePath)) {
+//             fs.unlink(oldImagePath, (err) => {
+//               if (err) console.error("Failed to delete old image:", err);
+//             });
+//           }
+//         }
+//       });
+
+//       // Update the images field with the new array of images
+//       profile.images = [...newImages];
+//     }
+
+//     // Update the profile with new data (if image or images are updated or any other field)
+//     profile = await UserModel.findByIdAndUpdate(
+//       profile._id,
+//       {
+//         background,
+//         DOB,
+//         firstName,
+//         lastName,
+//         phoneNumber,
+//         streetAddress,
+//         lga,
+//         state,
+//         kindred,
+//         village,
+//         autonomous,
+//         tribe,
+//         religion,
+//         profession,
+//         facebook,
+//         twitter,
+//         instagram,
+//         about,
+//         middlename,
+//         image: profile.image, // Set the current image
+//         images: profile.images, // Set the current images array
+//       },
+//       { new: true, runValidators: true }
+//     );
+//   } else {
+//     // Create new profile if none exists
+//     profile = await UserModel.create({
+//       _id: userId,
+//       background,
+//       DOB,
+//       firstName,
+//       lastName,
+//       phoneNumber,
+//       streetAddress,
+//       lga,
+//       state,
+//       kindred,
+//       village,
+//       autonomous,
+//       tribe,
+//       religion,
+//       profession,
+//       facebook,
+//       twitter,
+//       instagram,
+//       about,
+//       middlename,
+//       image: newImage, // Save new image (if any)
+//       images: newImages, // Save new images array (if any)
+//     });
+//   }
+
+//   const allProfiles = await getAllProfiles();
+
+//   res.status(201).json({ updatedProfile: profile, allProfiles });
+// });
+
 const createOrUpdateProfile = asyncHandler(async (req, res) => {
   const {
     background,
@@ -318,7 +451,7 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
     instagram,
     about,
     middlename,
-    captions = [], // Default to an empty array if captions are missing
+    captions = [],
   } = req.body;
 
   const userId = req.user._id;
@@ -350,26 +483,36 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
       profile.image = newImage; // Update image path
     }
 
-    // Handle multiple image updates (only if new images are provided)
-    if (newImages.length > 0) {
-      // Delete only the old images that are not in the newImages array
-      const oldImagePaths = profile.images.map((img) => img.path);
-      oldImagePaths.forEach((oldPath) => {
-        if (!newImages.find((newImg) => newImg.path === oldPath)) {
-          const oldImagePath = path.resolve(oldPath);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlink(oldImagePath, (err) => {
-              if (err) console.error("Failed to delete old image:", err);
-            });
-          }
+    // Handle multiple image updates
+    const updatedImages = [];
+
+    // Process existing images
+    if (profile.images && profile.images.length > 0) {
+      profile.images.forEach((img, index) => {
+        if (captions[index] !== undefined) {
+          // Update caption if provided
+          updatedImages.push({
+            path: img.path,
+            caption: captions[index],
+          });
+        } else {
+          // Keep existing caption if not provided
+          updatedImages.push(img);
         }
       });
-
-      // Update the images field with the new array of images
-      profile.images = [...newImages];
     }
 
-    // Update the profile with new data (if image or images are updated or any other field)
+    // Add new images
+    if (newImages.length > 0) {
+      newImages.forEach((newImg, index) => {
+        updatedImages.push({
+          path: newImg.path,
+          caption: captions[profile.images.length + index] || "",
+        });
+      });
+    }
+
+    // Update the profile with new data
     profile = await UserModel.findByIdAndUpdate(
       profile._id,
       {
@@ -392,13 +535,12 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
         instagram,
         about,
         middlename,
-        image: profile.image, // Set the current image
-        images: profile.images, // Set the current images array
+        image: profile.image,
+        images: updatedImages, // Use the updated images array
       },
       { new: true, runValidators: true }
     );
   } else {
-    // Create new profile if none exists
     profile = await UserModel.create({
       _id: userId,
       background,
@@ -517,6 +659,40 @@ const getuserByQuery = async (req, res) => {
   }
 };
 
+// New function to delete a single family image
+const deleteFamilyImage = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { imageIndex } = req.params;
+
+  const profile = await UserModel.findById(userId);
+
+  if (!profile) {
+    res.status(404);
+    throw new Error("Profile not found");
+  }
+
+  if (!profile.images || profile.images.length <= imageIndex) {
+    res.status(400);
+    throw new Error("Image not found");
+  }
+
+  const imageToDelete = profile.images[imageIndex];
+
+  // Remove the image file from the server
+  try {
+    await fs.unlink(path.resolve(imageToDelete.path));
+  } catch (error) {
+    console.error("Failed to delete image file:", error);
+  }
+
+  // Remove the image from the profile
+  profile.images.splice(imageIndex, 1);
+
+  // Save the updated profile
+  await profile.save();
+
+  res.status(200).json({ message: "Image deleted successfully", profile });
+});
 module.exports = {
   login,
   refreshToken,
@@ -531,4 +707,5 @@ module.exports = {
   getuserByQuery,
   AllProfiles,
   register,
+  deleteFamilyImage,
 };

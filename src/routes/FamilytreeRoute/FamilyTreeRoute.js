@@ -10,6 +10,7 @@ const {
   getProfile,
   AllProfiles,
   getAllUsers,
+  deleteFamilyImage,
   getuserByQuery,
 } = require("../../controller/authController");
 const {
@@ -138,7 +139,8 @@ router.route("/deletePerson/:id").delete(deletePerson);
 // getRoutes
 router.route("/getProfile/:userId").get(getProfile);
 router.route("/getAllProfiles").get(AllProfiles);
-// router.route("/api/getProfile/:userId").get(getProfile);
+router.route("/family-image/:imageIndex").delete(deleteFamilyImage);
+
 router.route("/GetPerson/:userId").get(Getperson);
 router.route("/GetMother/:userId").get(GetMother);
 router.route("/GetFather/:userId").get(GetFather);
