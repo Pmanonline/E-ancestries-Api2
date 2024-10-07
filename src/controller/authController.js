@@ -451,6 +451,7 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
     instagram,
     about,
     middlename,
+    gender,
     captions = [],
   } = req.body;
 
@@ -535,6 +536,7 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
         instagram,
         about,
         middlename,
+        gender,
         image: profile.image,
         images: updatedImages, // Use the updated images array
       },
@@ -562,6 +564,7 @@ const createOrUpdateProfile = asyncHandler(async (req, res) => {
       instagram,
       about,
       middlename,
+      gender,
       image: newImage, // Save new image (if any)
       images: newImages, // Save new images array (if any)
     });

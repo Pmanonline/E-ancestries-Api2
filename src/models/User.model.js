@@ -54,6 +54,7 @@ const UserSchema = new mongoose.Schema(
     instagram: { type: String },
     about: { type: String },
     middlename: { type: String },
+    gender: { type: String },
     image: {
       type: String, // URL of the user's profile image
     },
