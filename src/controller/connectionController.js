@@ -81,19 +81,21 @@ const respondToConnectionRequest = async (req, res) => {
         userId1: connectionRequest.senderId,
         userId2: connectionRequest.receiverId,
       });
-
       await newConnection.save();
+
+      // Update the connection request status
       connectionRequest.status = "Accepted";
+      await connectionRequest.save();
     } else {
-      // Mark the request as rejected
-      connectionRequest.status = "Rejected";
+      // If rejected, remove the connection request from the database
+      await ConnectionRequest.findByIdAndDelete(requestId);
     }
 
-    // Save the updated connection request
-    await connectionRequest.save();
-
     // Return a success message
-    res.status(200).json({ message: `Request ${response.toLowerCase()}.` });
+    res.status(200).json({
+      message: `Request ${response.toLowerCase()}.`,
+      status: response,
+    });
   } catch (error) {
     console.error("Error responding to connection request:", error);
     res.status(500).json({ message: "Server error", error });
@@ -112,12 +114,56 @@ const getConnections = async (req, res) => {
     const connections = await Connection.find({
       $or: [{ userId1: userId }, { userId2: userId }],
     })
-      .populate("userId1", "firstName lastName image")
-      .populate("userId2", "firstName lastName image");
+      .populate("userId1", "firstName lastName image gender")
+      .populate("userId2", "firstName lastName image gender");
 
     res.status(200).json(connections);
   } catch (error) {
     console.error("Error fetching connections:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+const deleteConnection = async (req, res) => {
+  try {
+    const { connectionId } = req.params;
+
+    // Delete the connection
+    const deletedConnection = await Connection.findByIdAndDelete(connectionId);
+
+    if (!deletedConnection) {
+      return res.status(404).json({ message: "Connection not found." });
+    }
+
+    // Remove related connection requests
+    await ConnectionRequest.deleteMany({
+      $or: [
+        {
+          senderId: deletedConnection.userId1,
+          receiverId: deletedConnection.userId2,
+        },
+        {
+          senderId: deletedConnection.userId2,
+          receiverId: deletedConnection.userId1,
+        },
+      ],
+    });
+
+    // Fetch updated connections list
+    const updatedConnections = await Connection.find({
+      $or: [
+        { userId1: deletedConnection.userId1 },
+        { userId2: deletedConnection.userId1 },
+      ],
+    })
+      .populate("userId1", "firstName lastName image gender")
+      .populate("userId2", "firstName lastName image gender");
+
+    res.status(200).json({
+      message: "Connection deleted successfully.",
+      connections: updatedConnections,
+    });
+  } catch (error) {
+    console.error("Error deleting connection:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
@@ -127,4 +173,5 @@ module.exports = {
   getPendingRequests,
   respondToConnectionRequest,
   getConnections,
+  deleteConnection,
 };

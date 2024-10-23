@@ -5,6 +5,7 @@ const {
   getPendingRequests,
   respondToConnectionRequest,
   getConnections,
+  deleteConnection,
 } = require("../controller/connectionController");
 
 // Routes
@@ -13,5 +14,6 @@ router.get("/pending/:userId", getPendingRequests);
 // Use the request ID to respond to a connection request
 router.post("/confirm/:requestId/response", respondToConnectionRequest);
 router.get("/connections/:userId", getConnections);
+router.delete("/deleteConnection/:connectionId", deleteConnection);
 
 module.exports = router;
