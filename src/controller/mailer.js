@@ -14,43 +14,95 @@ const generateToken = () => {
   return crypto.randomBytes(20).toString("hex");
 };
 
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      // Do not fail on invalid certificates
+      rejectUnauthorized: false,
+    },
+  });
+};
+
 const registerMail = async (req, res) => {
   const { email, firstName } = req.body;
 
   try {
-    // Create a transporter using nodemailer
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "petersonzoconis@gmail.com",
-        pass: "hszatxfpiebzavdd",
-      },
-    });
+    const transporter = createTransporter();
 
-    // Define mail options
+    // Verify SMTP connection configuration
+    await transporter.verify();
+
     const mailOptions = {
-      from: "petersonzoconis@gmail.com",
+      from: process.env.EMAIL_USER || "petersonzoconis@gmail.com",
       to: email,
       subject: "Signup Successful 🎉",
-      text: `Welcome ${email} to E-ancestry! 🎉 We're thrilled to have you join our platform. Get ready to unlock new opportunities and connect with a vibrant community. Feel free to explore all the features and resources we offer to make your experience unforgettable. If you have any questions or need assistance, don't hesitate to reach out. Let's embark on this journey together and make magic happen! 🚀`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Welcome to E-ancestry! 🎉</h2>
+          <p>Hello ${firstName || email},</p>
+          <p>We're thrilled to have you join our platform. Here's what you can do next:</p>
+          <ul>
+            <li>Complete your profile</li>
+            <li>Explore your family tree</li>
+            <li>Connect with relatives</li>
+            <li>Discover your heritage</li>
+          </ul>
+          <p>If you need any assistance, our support team is here to help!</p>
+          <p>Best regards,<br>The E-ancestry Team</p>
+        </div>
+      `,
     };
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.messageId);
 
-    // Log success message to the console
-    console.log("Email sent successfully!");
-
-    // Send a success response to the client
-    res.status(200).json({ message: "Email sent successfully!" });
+    res.status(200).json({
+      success: true,
+      message: "Welcome email sent successfully!",
+      messageId: info.messageId,
+    });
   } catch (error) {
-    // Log error to the console
-    console.error("Error sending email:", error);
+    console.error("Email service error:", {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+    });
 
-    // Send an error response to the client
-    res
-      .status(500)
-      .json({ error: "An error occurred while sending the email." });
+    res.status(500).json({
+      success: false,
+      error: "Failed to send welcome email",
+      details: error.message,
+    });
+  }
+};
+
+// Helper function to send any email
+const sendEmail = async ({ to, subject, html, text }) => {
+  const transporter = createTransporter();
+
+  try {
+    await transporter.verify();
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || "petersonzoconis@gmail.com",
+      to,
+      subject,
+      html,
+      text,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Email sending failed:", error);
+    throw error;
   }
 };
 
