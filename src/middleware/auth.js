@@ -4,45 +4,6 @@ const UserModel = require("../models/User.model");
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
-// Authentication middleware to verify access token
-// const authMiddleware = async (req, res, next) => {
-//   const token = req.headers.authorization?.split(" ")[1];
-//   // console.log("Authorization header token:", token);
-
-//   if (!token) {
-//     // console.log("No token provided");
-//     return res.status(401).json({ message: "No token, authorization denied" });
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, JWT_SECRET);
-//     // console.log("Decoded token:", decoded);
-
-//     let user;
-//     if (decoded._id) {
-//       user = await UserModel.findById(decoded._id).select("-password");
-//     } else if (decoded.googleId) {
-//       user = await UserModel.findOne({ googleId: decoded.googleId }).select(
-//         "-password"
-//       );
-//     }
-
-//     if (!user) {
-//       // console.log("User not found");
-//       return res
-//         .status(401)
-//         .json({ message: "User not found, authorization denied" });
-//     }
-
-//     req.user = user;
-//     console.log("loggedin usedr", user);
-//     next();
-//   } catch (error) {
-//     console.error("Token verification failed:", error.message);
-//     res.status(401).json({ message: "Token is not valid" });
-//   }
-// };
-
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 

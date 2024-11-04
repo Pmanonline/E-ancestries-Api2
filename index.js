@@ -9,7 +9,6 @@ const morgan = require("morgan");
 const cors = require("cors");
 const multer = require("multer");
 const dotenv = require("dotenv");
-const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const connectDB = require("./src/config/database");
 const Routes = require("./src/routes/route");
@@ -20,7 +19,6 @@ const historicalRoutes = require("./src/routes/historicalRoutes");
 const ConnectionRoute = require("./src/routes/connectionRoute");
 const UserModel = require("./src/models/User.model");
 const PersonModel = require("./src/models/personModel");
-// const passportConfig = require("./src/config/passport");
 const { authMiddleware, refreshMiddleware } = require("./src/middleware/auth");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -28,11 +26,14 @@ const MongoStore = require("connect-mongo");
 
 dotenv.config();
 connectDB();
-// passportConfig(passport);
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://eroot.ng/",
+      "https://ancestries.vercel.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -45,7 +46,11 @@ app.options("*", cors()); // Preflight response for all routes
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://ancestries.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://eroot.ng/",
+      "https://ancestries.vercel.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -167,21 +172,13 @@ app.get("/", (req, res) => {
   res.send("Welcome to the API");
 });
 
-app.get("/env-check", (req, res) => {
-  res.json({
-    NODE_ENV: process.env.NODE_ENV || "Not set",
-    PORT: process.env.PORT || "Not set",
-    MONGO_URI: process.env.MONGO_URI || "Not set",
-    SESSION_SECRET: process.env.SESSION_SECRET || "Not set",
-    EMAIL_USER: process.env.EMAIL_USER || "Not set",
-    EMAIL_PASS: process.env.EMAIL_PASS || "Not set",
-    JWT_SECRET: process.env.JWT_SECRET || "Not set",
-    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "Not set",
-    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET || "Not set",
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "Not set",
-    FRONTEND_URL: process.env.FRONTEND_URL || "Not set",
-  });
+const PORT =
+  process.env.NODE_ENV === "development" ? 30001 : process.env.PORT || 30001;
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-const PORT = process.env.PORT || 8080;
+// Start the server
+
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
